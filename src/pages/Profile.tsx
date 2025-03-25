@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Input } from "../components/ui/input";
-import { Button } from "../components/ui/button";
+// import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { fetchGitHubProfile, fetchGitHubRepos, fetchGitHubLanguages } from "../services/github";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
@@ -61,9 +61,15 @@ export default function Profile() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                 />
-                <Button onClick={handleFetchProfile} {...(loading ? { disabled: true } : {})}>
+                <button
+                    onClick={handleFetchProfile}
+                    disabled={loading}
+                    className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-400"
+                >
                     {loading ? "Carregando..." : "Buscar"}
-                </Button>
+                </button>
+
+
 
             </div>
 
