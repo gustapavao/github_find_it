@@ -61,9 +61,10 @@ export default function Profile() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                 />
-                <Button onClick={handleFetchProfile} disabled={loading}>
+                <Button onClick={handleFetchProfile} {...(loading ? { disabled: true } : {})}>
                     {loading ? "Carregando..." : "Buscar"}
                 </Button>
+
             </div>
 
             {error && <p className="text-red-500 mb-4">{error}</p>}
