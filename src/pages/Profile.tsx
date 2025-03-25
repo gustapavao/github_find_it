@@ -8,22 +8,47 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 export default function Profile() {
     const [username, setUsername] = useState("");
     const [profile, setProfile] = useState<any | null>(null);
+    const [error, setError] = useState("");
     const [repos, setRepos] = useState<any[]>([]);
     const [languages, setLanguages] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false); // Estado para carregar
 
     const handleFetchProfile = async () => {
-        const userData = await fetchGitHubProfile(username);
-        const repoData = await fetchGitHubRepos(username);
-        const languageData = await fetchGitHubLanguages(username);
+        if (!username.trim()) {
+            setError("Por favor, digite um nome de usuário!");
+            return;
+        }
 
-        setProfile(userData);
-        setRepos(repoData);
-        setLanguages(
-            Object.entries(languageData).map(([key, value]) => ({
-                name: key,
-                value,
-            }))
-        );
+        setLoading(true);
+        setError(""); // Limpa erro antes da nova busca
+        setProfile(null);
+        setRepos([]);
+        setLanguages([]);
+
+        try {
+            const userData = await fetchGitHubProfile(username);
+
+            // Verifica se a resposta contém "message: Not Found"
+            if (!userData || userData.message === "Not Found") {
+                throw new Error("Usuário não encontrado!");
+            }
+
+            const repoData = await fetchGitHubRepos(username);
+            const languageData = await fetchGitHubLanguages(username);
+
+            setProfile(userData);
+            setRepos(repoData);
+            setLanguages(
+                Object.entries(languageData).map(([key, value]) => ({
+                    name: key,
+                    value,
+                }))
+            );
+        } catch (err: any) {
+            setError(err.message || "Erro ao buscar dados do GitHub.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const colors = ["#ff6384", "#36a2eb", "#ffce56", "#4bc0c0", "#9966ff"];
@@ -36,8 +61,12 @@ export default function Profile() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                 />
-                <Button onClick={handleFetchProfile}>Buscar</Button>
+                <Button onClick={handleFetchProfile} disabled={loading}>
+                    {loading ? "Carregando..." : "Buscar"}
+                </Button>
             </div>
+
+            {error && <p className="text-red-500 mb-4">{error}</p>}
 
             {profile && (
                 <Card className="w-96 mb-8">
